@@ -1,15 +1,23 @@
 import SourceKittenFramework
+import ArgumentParser
 
 struct MatchedType {
     let kind: String
     let name: String
 }
 
-@main struct PluginExecutable {
-    static func main() throws {
-        let structure = try Structure(file: File(path: "/Users/polpiella/Developer/CodeGenSample/Sources/CodeGenSample/CodeGenSample.swift")!)
+@main
+struct PluginExecutable: ParsableCommand {
+    @Argument(help: "The files to be parsed by the script")
+    var files: [String]
+    
+    @Option(help: "The path where the generated files will be created")
+    var outputPath: String
+    
+    func run() throws {
+        let structures = try files.map { try Structure(file: File(path: $0)!) }
         var matchedTypes = [MatchedType]()
-        walkTree(dictionary: structure.dictionary, acc: &matchedTypes)
+        structures.forEach { Self.walkTree(dictionary: $0.dictionary, acc: &matchedTypes) }
     }
     
     private static func walkTree(dictionary: [String: SourceKitRepresentable], acc: inout [MatchedType]) {

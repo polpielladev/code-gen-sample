@@ -11,11 +11,12 @@ let package = Package(
             targets: ["CodeGenSample"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/jpsim/SourceKitten.git", exact: "0.32.0")
+        .package(url: "https://github.com/jpsim/SourceKitten.git", exact: "0.32.0"),
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0")
     ],
     targets: [
         .target(name: "CodeGenSample", dependencies: []),
         .plugin(name: "SourceKitPlugin", capability: .buildTool()),
-        .executableTarget(name: "PluginExecutable", dependencies: [.product(name: "SourceKittenFramework", package: "SourceKitten")])
+        .executableTarget(name: "PluginExecutable", dependencies: [.product(name: "SourceKittenFramework", package: "SourceKitten"), .product(name: "ArgumentParser", package: "swift-argument-parser")])
     ]
 )
