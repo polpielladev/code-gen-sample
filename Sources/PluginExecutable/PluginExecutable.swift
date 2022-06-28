@@ -8,7 +8,10 @@ struct MatchedType {
 
 @main
 struct PluginExecutable: ParsableCommand {
-    @Argument(help: "The files to be parsed by the script")
+    @Argument(help: "The protocol name to match")
+    var protocolName: String
+    
+    @Option(help: "The files to be parsed by the script")
     var files: [String]
     
     @Option(help: "The path where the generated files will be created")
@@ -17,15 +20,15 @@ struct PluginExecutable: ParsableCommand {
     func run() throws {
         let structures = try files.map { try Structure(file: File(path: $0)!) }
         var matchedTypes = [MatchedType]()
-        structures.forEach { Self.walkTree(dictionary: $0.dictionary, acc: &matchedTypes) }
+        structures.forEach { walkTree(dictionary: $0.dictionary, acc: &matchedTypes) }
     }
     
-    private static func walkTree(dictionary: [String: SourceKitRepresentable], acc: inout [MatchedType]) {
-        acc.append(contentsOf: extractTypeNames(withInheritance: "FindThis", from: dictionary))
+    private func walkTree(dictionary: [String: SourceKitRepresentable], acc: inout [MatchedType]) {
+        acc.append(contentsOf: extractTypeNames(withInheritance: protocolName, from: dictionary))
         
         if let array = dictionary["key.substructure"] as? [[String: SourceKitRepresentable]] {
             array.forEach { innerDict in
-                acc.append(contentsOf: extractTypeNames(withInheritance: "FindThis", from: innerDict))
+                acc.append(contentsOf: extractTypeNames(withInheritance: protocolName, from: innerDict))
                 
                 // Recurse through every single bit...
                 if let substructure = innerDict["key.substructure"] as? [[String: SourceKitRepresentable]] {
@@ -35,7 +38,7 @@ struct PluginExecutable: ParsableCommand {
         }
     }
     
-    private static func extractTypeNames(withInheritance inheritanceName: String, from dict: [String: SourceKitRepresentable]) -> [MatchedType] {
+    private func extractTypeNames(withInheritance inheritanceName: String, from dict: [String: SourceKitRepresentable]) -> [MatchedType] {
         guard let inheritedTypes = dict["key.inheritedtypes"] as? [[String: String]],
               let name = dict["key.name"] as? String,
               let kind = dict["key.kind"] as? String else { return [] }
