@@ -18,8 +18,7 @@ let package = Package(
     targets: [
         .target(
             name: "CodeGenSample",
-            dependencies: [],
-            plugins: ["SourceKitPlugin"]
+            dependencies: []
         ),
         .plugin(
             name: "SourceKitPlugin",
@@ -32,6 +31,7 @@ let package = Package(
                 .product(name: "SourceKittenFramework", package: "SourceKitten"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser")
             ]
-        )
+        ),
+        .testTarget(name: "CodeGenSampleTests", dependencies: ["CodeGenSample"], plugins: ["SourceKitPlugin"])
     ]
 )

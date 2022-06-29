@@ -4,6 +4,15 @@ import PackagePlugin
 struct SourceKitPlugin: BuildToolPlugin {
     func createBuildCommands(context: PluginContext, target: Target) async throws -> [Command] {
         let outputPath = context.pluginWorkDirectory.appending("Generated.swift")
+        guard let path = target.dependencies.compactMap({ dependency -> Target? in
+            switch dependency {
+            case .target(let target): return target
+            default: return nil
+            }
+        }).filter({ "\($0.name)Tests" == target.name  }).map({ $0.directory }).first else {
+            Diagnostics.error("Could not get a path!")
+            return []
+        }
         
         return [
             .buildCommand(
@@ -12,7 +21,7 @@ struct SourceKitPlugin: BuildToolPlugin {
                 arguments: [
                     "FindThis",
                     "--input",
-                    target.directory,
+                    path,
                     "--output",
                     outputPath.string
                 ],

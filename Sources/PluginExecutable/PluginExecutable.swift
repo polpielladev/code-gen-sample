@@ -97,9 +97,9 @@ struct PluginExecutable: ParsableCommand {
         }.joined(separator: "\n")
         
         let template = """
-        import XCTestCase
+        import XCTest
         
-        class XCTests: XCTestCase {
+        class GeneratedTests: XCTestCase {
         \(testMethods)
         }
         """
