@@ -11,6 +11,9 @@ struct PluginExecutable: ParsableCommand {
     @Argument(help: "The protocol name to match")
     var protocolName: String
     
+    @Argument(help: "The module's name")
+    var moduleName: String
+    
     @Option(help: "Directory containing the swift files")
     var input: String
     
@@ -90,17 +93,22 @@ struct PluginExecutable: ParsableCommand {
     private func createOutputFile(withContent matchedTypes: [String]) throws {
         let testMethods = matchedTypes.map {
             """
-            \tfunc testThis() {
-            \t\t\($0)
+            \tfunc test\($0.replacingOccurrences(of: ".", with: "_"))() {
+            \t\tassertCanParseFromDefaults(\($0).self)
             \t}
             """
         }.joined(separator: "\n")
         
         let template = """
         import XCTest
+        @testable import \(moduleName)
         
         class GeneratedTests: XCTestCase {
         \(testMethods)
+        
+            private func assertCanParseFromDefaults<T: \(protocolName)>(_ type: T.Type) {
+                // Logic goes here...
+            }
         }
         """
         
