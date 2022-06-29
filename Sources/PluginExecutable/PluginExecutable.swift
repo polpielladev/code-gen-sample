@@ -41,6 +41,10 @@ struct PluginExecutable: ParsableCommand {
             return
         }
         
+        if let name = dictionary["key.name"] as? String, hasMatchedType(withInheritance: protocolName, from: dictionary) {
+            currentPath?.seenTypes.append(name)
+        }
+        
         substructure.forEach { innerDict in
             // Set if it's the beginning of a path.
             let currentPath = currentPath ?? CurrentPath()

@@ -24,3 +24,19 @@ enum NamespaceTwo {
 struct FindAnotherOther {
     
 }
+
+
+struct Hello {
+    struct World {
+        struct Mate: FindThis {
+        }
+    }
+}
+    
+struct HelloFindAnother {
+    struct SomeOtherWrapped: FindThis {
+        struct SomeOtherOtherWrapped {
+            
+        }
+    }
+}
