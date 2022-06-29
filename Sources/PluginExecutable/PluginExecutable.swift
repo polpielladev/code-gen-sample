@@ -1,5 +1,6 @@
 import SourceKittenFramework
 import ArgumentParser
+import Foundation
 
 struct MatchedType {
     let kind: String
@@ -15,12 +16,15 @@ struct PluginExecutable: ParsableCommand {
     var files: [String]
     
     @Option(help: "The path where the generated files will be created")
-    var outputPath: String
+    var output: String
     
     func run() throws {
+        // Needed to ensure that sourcekit runs in a single process
+        setenv("IN_PROCESS_SOURCEKIT", "YES", 1)
         let structures = try files.map { try Structure(file: File(path: $0)!) }
         var matchedTypes = [MatchedType]()
         structures.forEach { walkTree(dictionary: $0.dictionary, acc: &matchedTypes) }
+        try createOutputFile(withContent: matchedTypes)
     }
     
     private func walkTree(dictionary: [String: SourceKitRepresentable], acc: inout [MatchedType]) {
@@ -47,5 +51,28 @@ struct PluginExecutable: ParsableCommand {
             .compactMap { $0["key.name"] }
             .filter { $0 == inheritanceName }
             .map { _ in MatchedType(kind: kind, name: name) }
+    }
+    
+    private func createOutputFile(withContent matchedTypes: [MatchedType]) throws {
+        let testMethods = matchedTypes.map {
+            """
+            \tfunc testThis() {
+            \t\t\($0.name)
+            \t}
+            """
+        }.joined(separator: "\n")
+        
+        let template = """
+        import XCTestCase
+        
+        class XCTests: XCTestCase {
+        \(testMethods)
+        }
+        """
+        
+        let fileURL = URL(string: output)!
+            .appendingPathComponent("Hello.swift")
+
+        try template.write(to: fileURL, atomically: true, encoding: .utf8)
     }
 }

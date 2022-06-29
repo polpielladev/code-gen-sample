@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "CodeGenSample",
+    platforms: [.macOS(.v10_11)],
     products: [
         .library(
             name: "CodeGenSample",
@@ -15,8 +16,22 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0")
     ],
     targets: [
-        .target(name: "CodeGenSample", dependencies: []),
-        .plugin(name: "SourceKitPlugin", capability: .buildTool()),
-        .executableTarget(name: "PluginExecutable", dependencies: [.product(name: "SourceKittenFramework", package: "SourceKitten"), .product(name: "ArgumentParser", package: "swift-argument-parser")])
+        .target(
+            name: "CodeGenSample",
+            dependencies: [],
+            plugins: ["SourceKitPlugin"]
+        ),
+        .plugin(
+            name: "SourceKitPlugin",
+            capability: .buildTool(),
+            dependencies: [.target(name: "PluginExecutable")]
+        ),
+        .executableTarget(
+            name: "PluginExecutable",
+            dependencies: [
+                .product(name: "SourceKittenFramework", package: "SourceKitten"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]
+        )
     ]
 )
