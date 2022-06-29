@@ -43,21 +43,21 @@ struct PluginExecutable: ParsableCommand {
         
         substructure.forEach { innerDict in
             // Set if it's the beginning of a path.
-            let toSendCurrentPath = currentPath ?? CurrentPath()
+            let currentPath = currentPath ?? CurrentPath()
             if let name = innerDict["key.name"] as? String {
-                toSendCurrentPath.seenTypes.append(name)
+                currentPath.seenTypes.append(name)
             }
             
             let hasMatched = hasMatchedType(withInheritance: protocolName, from: innerDict)
             
-            if hasMatched, let currentPath = currentPath {
+            if hasMatched {
                 acc.append("\(currentPath.seenTypes.joined(separator: "."))")
                 return
             }
             
             // Recurse through every single bit...
             if let substructure = innerDict["key.substructure"] as? [[String: SourceKitRepresentable]] {
-                substructure.forEach { walkTree(dictionary: $0, acc: &acc, currentPath: toSendCurrentPath) }
+                substructure.forEach { walkTree(dictionary: $0, acc: &acc, currentPath: currentPath) }
             }
         }
     }
