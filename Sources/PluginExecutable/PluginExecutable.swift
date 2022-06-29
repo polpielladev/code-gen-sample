@@ -70,8 +70,7 @@ struct PluginExecutable: ParsableCommand {
         }
         """
         
-        let fileURL = URL(string: output)!
-            .appendingPathComponent("Hello.swift")
+        let fileURL = URL(fileURLWithPath: output)
 
         try template.write(to: fileURL, atomically: true, encoding: .utf8)
     }
