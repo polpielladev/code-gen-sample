@@ -32,7 +32,12 @@ struct PluginExecutable: ParsableCommand {
         
         if let array = dictionary["key.substructure"] as? [[String: SourceKitRepresentable]] {
             array.forEach { innerDict in
-                acc.append(contentsOf: extractTypeNames(withInheritance: protocolName, from: innerDict))
+                let extractedTypes = extractTypeNames(withInheritance: protocolName, from: innerDict)
+                let hasMatched = !extractedTypes.isEmpty
+                
+                acc.append(contentsOf: extractedTypes)
+                
+                guard !hasMatched else { return }
                 
                 // Recurse through every single bit...
                 if let substructure = innerDict["key.substructure"] as? [[String: SourceKitRepresentable]] {
