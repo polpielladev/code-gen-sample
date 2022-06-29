@@ -41,7 +41,7 @@ struct PluginExecutable: ParsableCommand {
             return
         }
         
-        if let name = dictionary["key.name"] as? String, hasMatchedType(withInheritance: protocolName, from: dictionary) {
+        if let name = dictionary["key.name"] as? String, !hasMatchedType(withInheritance: protocolName, from: dictionary) {
             currentPath?.seenTypes.append(name)
         }
         
