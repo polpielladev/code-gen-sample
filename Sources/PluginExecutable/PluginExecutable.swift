@@ -11,8 +11,8 @@ struct PluginExecutable: ParsableCommand {
     @Argument(help: "The protocol name to match")
     var protocolName: String
     
-    @Option(help: "The files to be parsed by the script")
-    var files: [String]
+    @Option(help: "Directory containing the swift files")
+    var input: String
     
     @Option(help: "The path where the generated files will be created")
     var output: String
@@ -20,10 +20,22 @@ struct PluginExecutable: ParsableCommand {
     func run() throws {
         // Needed to ensure that sourcekit runs in a single process
         setenv("IN_PROCESS_SOURCEKIT", "YES", 1)
-        let structures = try files.map { try Structure(file: File(path: $0)!) }
+        let files = try deepSearch(URL(fileURLWithPath: input, isDirectory: true))
+        let structures = try files.map { try Structure(file: File(path: $0.path)!) }
         var matchedTypes = [String]()
         structures.forEach { walkTree(dictionary: $0.dictionary, acc: &matchedTypes) }
         try createOutputFile(withContent: matchedTypes)
+    }
+    
+    private func deepSearch(_ directory: URL) throws -> [URL] {
+        guard let enumerator = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: [.isRegularFileKey], options: [.skipsHiddenFiles]) else {
+            return []
+        }
+        
+        return try enumerator
+            .compactMap { $0 as? URL }
+            .filter { try $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile! }
+            .filter { $0.pathExtension == "swift" }
     }
     
     private func walkTree(dictionary: [String: SourceKitRepresentable], acc: inout [String], currentPath: CurrentPath? = nil) {
@@ -37,7 +49,7 @@ struct PluginExecutable: ParsableCommand {
             if hasMatched, let currentPath = currentPath {
                 acc.append("\(currentPath.seenTypes.joined(separator: "."))")
             }
-        
+            
             return
         }
         
@@ -93,7 +105,7 @@ struct PluginExecutable: ParsableCommand {
         """
         
         let fileURL = URL(fileURLWithPath: output)
-
+        
         try template.write(to: fileURL, atomically: true, encoding: .utf8)
     }
 }

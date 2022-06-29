@@ -11,8 +11,8 @@ struct SourceKitPlugin: BuildToolPlugin {
                 executable: try context.tool(named: "PluginExecutable").path,
                 arguments: [
                     "FindThis",
-                    "--files",
-                    target.directory.appending("CodeGenSample.swift"),
+                    "--input",
+                    target.directory,
                     "--output",
                     outputPath.string
                 ],
