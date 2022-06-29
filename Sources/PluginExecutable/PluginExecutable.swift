@@ -23,7 +23,6 @@ struct PluginExecutable: ParsableCommand {
         let structures = try files.map { try Structure(file: File(path: $0)!) }
         var matchedTypes = [String]()
         structures.forEach { walkTree(dictionary: $0.dictionary, acc: &matchedTypes) }
-        print(matchedTypes)
         try createOutputFile(withContent: matchedTypes)
     }
     
