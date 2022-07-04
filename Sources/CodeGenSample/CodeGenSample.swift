@@ -1,42 +1,27 @@
-protocol FindThis {}
+import Foundation
 
-enum NamespaceOne {
-    struct FindThisImpl: FindThis {
-        
-    }
-}
+protocol FindThis: Decodable, Equatable {}
 
-struct FindAnother: FindThis {
-    struct SomeOtherWrapped: FindThis {
-        struct SomeOtherOtherWrapped: FindThis {
-            
-        }
-    }
-}
-
-enum NamespaceTwo {
-    struct FindAnotherOther: FindThis {
-        
-    }
-}
-
-
-struct FindAnotherOther {
+struct FeatureABlock: FindThis {
+    let featureA: FeatureA
     
-}
-
-
-struct Hello {
-    struct World {
-        struct Mate: FindThis {
-        }
+    struct FeatureA: FindThis {
+        let url: URL
     }
 }
+
+enum Root {
+    struct RootBlock: FindThis {
+        let url: URL
+        let areAllFeaturesEnabled: Bool
+    }
+}
+
+
+struct FeatureBBlock: FindThis {
+    let featureB: FeatureB
     
-struct HelloFindAnother {
-    struct SomeOtherWrapped: FindThis {
-        struct SomeOtherOtherWrapped {
-            
-        }
+    struct FeatureB: FindThis {
+        let url: URL
     }
 }
